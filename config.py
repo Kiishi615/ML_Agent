@@ -132,7 +132,7 @@ def load_config(
 
     logging = LoggingConfig(
         level=get_int("logging", "level"),
-        log_dir=get("logging", "level"),
+        log_dir=get("logging", "log_dir"),
     )
 
     database = DatabaseConfig(

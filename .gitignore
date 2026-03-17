@@ -231,4 +231,6 @@ __pycache__/
 *.pyc
 logs/
 *.db
-
+.png
+.joblib
+.csv

@@ -2,21 +2,18 @@
 ML PIPELINE REPORT
 ============================================================
 
-Dataset shape: (494, 9)
-Columns: ['Survived', 'Pclass', 'Age', 'SibSp', 'Ticket', 'Fare', 'Sex_male', 'Embarked_Q', 'Embarked_S']
+X_train shape: (333264, 108)
+X_test shape:  (83316, 108)
 
-X_train shape: (395, 8)
-X_test shape:  (99, 8)
-
-Model: LogisticRegression
-Accuracy: 0.7980
+Model: GradientBoostingClassifier
+Accuracy: 0.9183
 
 Classification Report:
               precision    recall  f1-score   support
 
-           0       0.86      0.88      0.87        74
-           1       0.61      0.56      0.58        25
+           0       0.92      1.00      0.96     76377
+           1       0.78      0.03      0.05      6939
 
-    accuracy                           0.80        99
-   macro avg       0.73      0.72      0.73        99
-weighted avg       0.79      0.80      0.80        99
+    accuracy                           0.92     83316
+   macro avg       0.85      0.51      0.50     83316
+weighted avg       0.91      0.92      0.88     83316

@@ -62,7 +62,6 @@ logger.info("Config loaded successfully")
 model = init_chat_model(model='gpt-5-mini')
 
 checkpoint = InMemorySaver()
-config = {'configurable' : {'thread_id' : 1}}
 
 #======================================================================= setup ends here
 create_tables()
@@ -82,7 +81,7 @@ while True:
         continue
     filepaths.append((fp, report))
     print(f"  ✓ {Path(fp).name}: {report['row_count']} rows, {report['column_count']} cols")
-
+    
 file_sessions = []
 for fp, report in filepaths:
     filename = Path(fp).name
@@ -164,6 +163,8 @@ for func in tool_functions:
 #======================================================================= setup ends here
 
 
+config = {'configurable' : {'thread_id' : primary_session_id}}
+
 agent = create_agent(
     model=model,
     system_prompt=(
@@ -185,38 +186,38 @@ agent = create_agent(
             - Best overall for tabular data: "lightgbm" (fast, low memory, handles most things)
             - For interpretability: "decision_tree"
             - Available classification models: logistic_regression, ridge_classifier, decision_tree,
-              random_forest, gradient_boosting, lightgbm
+            random_forest, gradient_boosting, lightgbm
             - Available regression models: linear_regression, ridge, lasso, decision_tree,
-              random_forest, gradient_boosting, lightgbm
+            random_forest, gradient_boosting, lightgbm
 
             ═══════════════════════════════════════════════════════════
             PHASE 1: LOAD & UNDERSTAND
             ═══════════════════════════════════════════════════════════
             1. load_dataset → Load files into memory. 
             2. subsample_data → REQUIRED IF ANY DATASET > 50,000 ROWS. 
-               - If merging multiple files: Pass the main file as df_name, and pass the 
-                 other files in `related_dfs` using the shared `key_column`. This ensures 
-                 the rows perfectly match up before merging.
-               - Do this BEFORE cleaning or encoding anything to prevent memory crashes.
+            - If merging multiple files: Pass the main file as df_name, and pass the 
+                other files in `related_dfs` using the shared `key_column`. This ensures 
+                the rows perfectly match up before merging.
+            - Do this BEFORE cleaning or encoding anything to prevent memory crashes.
             3. get_basic_info → READ the output. Note missing values, dtypes, row count.
             3. identify_target_column → If not found, STOP and ask the user. Do NOT guess.
-               READ the problem_type it returns — "classification" or "regression".
-               Store this mentally. Every modeling call needs it.
+            READ the problem_type it returns — "classification" or "regression".
+            Store this mentally. Every modeling call needs it.
             4. visualize_missing → IF get_basic_info showed missing values > 0.
-               Gives a visual heatmap of missingness patterns. Helps decide how to clean.
-               SKIP if no missing values.
+            Gives a visual heatmap of missingness patterns. Helps decide how to clean.
+            SKIP if no missing values.
             5. plot_boxplots → Optional. Good for quick outlier overview during exploration.
-               SKIP unless you want to show the user spread/outliers early.
+            SKIP unless you want to show the user spread/outliers early.
 
             ═══════════════════════════════════════════════════════════
             PHASE 2: CLEAN (only if needed — check get_basic_info output)
             ═══════════════════════════════════════════════════════════
             6. strip_whitespace → Always run first. Dirty spacing breaks everything downstream.
             7. rename_columns → IF column names have spaces, caps, or special chars.
-               Use clean_all=True for automatic cleanup.
-               SKIP if names are already clean lowercase_with_underscores.
+            Use clean_all=True for automatic cleanup.
+            SKIP if names are already clean lowercase_with_underscores.
             8. cast_types → IF get_basic_info shows wrong dtypes (e.g. numeric stored as object).
-               SKIP if all dtypes look correct.
+            SKIP if all dtypes look correct.
             9. drop_missing_target_rows → Always run. Even 1 null target corrupts training.
             10. drop_high_missing_columns → IF any column has >50% missing values.
                 Run BEFORE handle_missing_features — no point imputing a mostly-empty column.
@@ -369,20 +370,20 @@ agent = create_agent(
             - READ every tool output before calling the next tool.
             - If a tool returns an error, FIX IT. Don't barrel forward.
             - If classification accuracy < 0.6, tell the user honestly.
-              Consider running compare_models or tune_hyperparameters to improve.
+            Consider running compare_models or tune_hyperparameters to improve.
             - If regression R² < 0.3, tell the user the model explains very little variance.
-              Consider feature engineering or compare_models.
+            Consider feature engineering or compare_models.
             - If the dataset has < 50 rows, WARN the user results may be unreliable.
             - identify_target_column returns problem_type. USE IT.
-              If problem_type is "classification", use compute_metrics + plot_confusion_matrix.
-              If problem_type is "regression", use compute_regression_metrics + plot_residuals.
-              Do NOT mix them up.
+            If problem_type is "classification", use compute_metrics + plot_confusion_matrix.
+            If problem_type is "regression", use compute_regression_metrics + plot_residuals.
+            Do NOT mix them up.
             - ALWAYS pass problem_type to train_single_model, compare_models,
-              cross_validate_model, and tune_hyperparameters.
+            cross_validate_model, and tune_hyperparameters.
             - NEVER fabricate metrics. Only report what the tools return.
             - When in doubt, call get_pipeline_state to see where you are.
             - When talking to the user, be direct. Say what you did, what you
-              found, and what it means. No filler.
+            found, and what it means. No filler.
 
             ═══════════════════════════════════════════════════════════
             SKIPPING RULES
@@ -400,7 +401,7 @@ agent = create_agent(
             - No grouping column → skip aggregate_features
             - Classes are balanced → skip handle_class_imbalance
             - problem_type is regression → skip compute_metrics, plot_confusion_matrix,
-              plot_roc, plot_precision_recall_curve, plot_calibration, handle_class_imbalance
+            plot_roc, plot_precision_recall_curve, plot_calibration, handle_class_imbalance
             - problem_type is classification → skip compute_regression_metrics, plot_residuals
             - First pass → skip create_interactions, create_polynomials, create_ratio_features.
 
@@ -408,21 +409,20 @@ agent = create_agent(
             RECOVERY RULES
             ═══════════════════════════════════════════════════════════
             - train_single_model says non-numeric columns → run encode_categorical,
-              then re-run separate_features_and_target → split_data → scale_features → train.
+            then re-run separate_features_and_target → split_data → scale_features → train.
             - compare_models all fail → check for NaN/inf in features. Run get_basic_info.
             - accuracy/R² is terrible → try compare_models, tune_hyperparameters,
-              or go back and try feature engineering.
+            or go back and try feature engineering.
             - too many features after encoding → run drop_low_variance, drop_correlated,
-              or select_k_best_features.
+            or select_k_best_features.
             - dataset too small after remove_outliers → undo by reloading and use
-              clip_values instead.
+            clip_values instead.
             - check_data_leakage flagged columns → drop them with drop_columns and retrain.
             """
     ),
     checkpointer=checkpoint,
     tools=agent_tools,
-)
-
+    )
 while True:
     user_input = input("Human: ")
     if user_input.lower() == "quit":

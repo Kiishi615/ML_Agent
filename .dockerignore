@@ -6,3 +6,38 @@ data/*.db
 .png
 .joblib
 .csv
+
+# Ignore any .db or .sqlite file anywhere in the entire project
+**/*.db
+**/*.sqlite
+**/*.log
+
+# Ignore specific folders entirely
+dev_db/
+logs/
+
+# Environment Variables
+.env
+
+# Database Files
+data/*.db
+dev_db/
+*.sqlite
+*.db
+
+# Logs
+logs/
+*.log
+
+# Cache & Environment
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+env/
+
+app.py
+# Git
+.git/
+.gitignore

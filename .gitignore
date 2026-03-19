@@ -234,3 +234,4 @@ logs/
 .png
 .joblib
 .csv
+.dockerignore

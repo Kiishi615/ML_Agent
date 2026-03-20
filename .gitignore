@@ -231,7 +231,11 @@ __pycache__/
 *.pyc
 logs/
 *.db
-.png
-.joblib
-.csv
+*.png
+*.joblib
+*.csv
 .dockerignore
+app.py
+
+report.txt
+lightgbm_report.txt
